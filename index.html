@@ -15,6 +15,7 @@
     background: url('Werkstatt.jpg') no-repeat center center fixed;
     background-size: cover;
   }
+
   #digitalClock {
     font-size: 2.5em;
     font-family: monospace;
@@ -22,6 +23,7 @@
     margin: 15px 0 0 0;
     text-shadow: 0 0 10px red;
   }
+
   canvas {
     background: white;
     border-radius: 50%;
@@ -31,6 +33,7 @@
     display: block;
     margin: 15px auto 30px auto;
   }
+
   .timer-btns button {
     margin: 5px;
     padding: 10px 15px;
@@ -41,6 +44,7 @@
     border-radius: 5px;
     cursor: pointer;
   }
+
   #timer {
     font-size: 1.8em;
     margin-top: 10px;
@@ -48,7 +52,6 @@
     font-family: monospace;
   }
 
-  /* Kalender-Styles */
   .calendar {
     width: 320px;
     margin: 10px auto 20px auto;
@@ -61,6 +64,7 @@
     box-sizing: border-box;
     user-select: none;
   }
+
   mark {
     background-color: #ff4444;
     color: white;
@@ -69,7 +73,6 @@
     border-radius: 3px;
   }
 
-  /* Flex Container für Notizen + Rechner */
   #notesCalculatorContainer {
     display: flex;
     justify-content: center;
@@ -80,16 +83,17 @@
   }
 
   #notesContainer, #calculator {
-    flex: 1 1 45%;
-    min-width: 280px;
+    flex: 1 1 40%;
+    min-width: 240px;
     background: rgba(40, 40, 40, 0.85);
-    padding: 10px 12px;
-    border-radius: 10px;
+    padding: 8px 10px;
+    border-radius: 8px;
     box-sizing: border-box;
-    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    box-shadow: 0 0 8px rgba(0,0,0,0.2);
     font-family: monospace;
     text-align: left;
     color: #f1f1f1;
+    font-size: 0.9em;
   }
 
   #notesContainer h2 {
@@ -100,10 +104,10 @@
 
   #notes {
     width: 100%;
-    height: 120px;
+    height: 90px;
     font-family: monospace;
-    font-size: 14px;
-    padding: 8px;
+    font-size: 13px;
+    padding: 6px;
     border-radius: 6px;
     border: 1px solid #555;
     resize: vertical;
@@ -115,7 +119,7 @@
   #saveNotesBtn {
     margin-top: 10px;
     padding: 8px 16px;
-    font-size: 14px;
+    font-size: 13px;
     background-color: #2196F3;
     color: white;
     border: none;
@@ -127,13 +131,12 @@
     background-color: #0b7dda;
   }
 
-  /* Taschenrechner */
   #calcDisplay {
     width: 100%;
-    height: 40px;
-    font-size: 1.5em;
+    height: 35px;
+    font-size: 1.2em;
     text-align: right;
-    padding: 5px 10px;
+    padding: 4px 8px;
     margin-bottom: 10px;
     border-radius: 6px;
     border: 1px solid #555;
@@ -144,10 +147,10 @@
   }
 
   #calcButtons button {
-    width: 22%;
+    width: 21%;
     margin: 1%;
-    font-size: 1.3em;
-    padding: 10px 0;
+    font-size: 1.1em;
+    padding: 8px 0;
     border: none;
     border-radius: 6px;
     cursor: pointer;
@@ -169,7 +172,7 @@
   }
 
   #calcButtons button.equals {
-    width: 94%;
+    width: 92%;
     background-color: #2196F3;
     color: white;
   }
@@ -181,11 +184,9 @@
 </head>
 <body>
 
-<!-- UHR -->
 <div id="digitalClock">--:--:--</div>
 <canvas id="clockCanvas" width="280" height="280"></canvas>
 
-<!-- TIMER -->
 <div class="timer-btns">
   <button onclick="startTimer(1)">1 Minute</button>
   <button onclick="startTimer(2)">2 Minuten</button>
@@ -195,10 +196,8 @@
 </div>
 <div id="timer">00:00</div>
 
-<!-- KALENDER -->
 <div class="calendar" id="calendarDisplay"></div>
 
-<!-- NOTIZEN & TASCHENRECHNER -->
 <div id="notesCalculatorContainer">
   <div id="notesContainer">
     <h2>Notizen</h2>
@@ -236,8 +235,185 @@
 </div>
 
 <script>
-// Uhr, Timer, Kalender, Notizen, Taschenrechner — bleibt gleich
-// (verwende einfach deinen Original-JavaScript, wie du es bereits eingefügt hast)
+// UHR, TIMER, KALENDER, NOTIZEN, RECHNER
+(function() {
+  var canvas = document.getElementById('clockCanvas');
+  var ctx = canvas.getContext('2d');
+  var radius = canvas.height / 2;
+  var centerX = canvas.width / 2;
+  var centerY = canvas.height / 2;
+
+  function drawClock() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius * 0.9, 0, 2 * Math.PI);
+    ctx.fillStyle = 'white';
+    ctx.fill();
+    ctx.lineWidth = 8;
+    ctx.strokeStyle = '#333';
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, 8, 0, 2 * Math.PI);
+    ctx.fillStyle = '#333';
+    ctx.fill();
+
+    drawNumbers();
+    drawHands();
+  }
+
+  function drawNumbers() {
+    ctx.font = radius * 0.12 + "px Arial";
+    ctx.fillStyle = '#000';
+    ctx.textBaseline = "middle";
+    ctx.textAlign = "center";
+
+    for (var num = 1; num <= 12; num++) {
+      var ang = num * Math.PI / 6;
+      var x = centerX + Math.cos(ang - Math.PI/2) * radius * 0.75;
+      var y = centerY + Math.sin(ang - Math.PI/2) * radius * 0.75;
+      ctx.fillText(num.toString(), x, y);
+    }
+  }
+
+  function drawHands() {
+    var now = new Date();
+    var hour = now.getHours() % 12;
+    var minute = now.getMinutes();
+    var second = now.getSeconds();
+
+    drawHand(((hour + minute / 60) * Math.PI / 6) - Math.PI/2, radius * 0.5, 8);
+    drawHand((minute * Math.PI / 30) - Math.PI/2, radius * 0.7, 6);
+    drawHand((second * Math.PI / 30) - Math.PI/2, radius * 0.85, 2, 'red');
+
+    document.getElementById('digitalClock').textContent =
+      (now.getHours()<10?'0':'') + now.getHours() + ':' +
+      (minute<10?'0':'') + minute + ':' +
+      (second<10?'0':'') + second;
+  }
+
+  function drawHand(angle, length, width, color) {
+    ctx.beginPath();
+    ctx.lineWidth = width;
+    ctx.lineCap = "round";
+    ctx.strokeStyle = color || '#000';
+    ctx.moveTo(centerX, centerY);
+    ctx.lineTo(centerX + length * Math.cos(angle), centerY + length * Math.sin(angle));
+    ctx.stroke();
+  }
+
+  setInterval(drawClock, 1000);
+  drawClock();
+
+  var countdown;
+  var isTimerRunning = false;
+
+  window.startTimer = function(minutes) {
+    if (isTimerRunning) {
+      clearInterval(countdown);
+      isTimerRunning = false;
+      document.getElementById('timer').innerText = '00:00';
+    }
+
+    var totalSeconds = minutes * 60;
+    isTimerRunning = true;
+    updateTimerDisplay(totalSeconds);
+
+    countdown = setInterval(function () {
+      totalSeconds--;
+      updateTimerDisplay(totalSeconds);
+
+      if (totalSeconds <= 0) {
+        clearInterval(countdown);
+        isTimerRunning = false;
+        alert("Zeit ist um!");
+        document.getElementById('timer').innerText = '00:00';
+      }
+    }, 1000);
+  };
+
+  function updateTimerDisplay(seconds) {
+    var minutes = Math.floor(seconds / 60);
+    var remainingSeconds = seconds % 60;
+    document.getElementById('timer').innerText =
+      (minutes < 10 ? '0' : '') + minutes + ':' +
+      (remainingSeconds < 10 ? '0' : '') + remainingSeconds;
+  }
+
+  // Kalender
+  function renderCalendar() {
+    var calendar = document.getElementById('calendarDisplay');
+    var now = new Date();
+    var year = now.getFullYear();
+    var month = now.getMonth();
+    var today = now.getDate();
+    var firstDay = new Date(year, month, 1);
+    var lastDay = new Date(year, month + 1, 0);
+    var daysInMonth = lastDay.getDate();
+    var startWeekday = firstDay.getDay();
+    var weekHeader = ['Mo','Di','Mi','Do','Fr','Sa','So'];
+    var weeks = [], week = [];
+
+    var dayOffset = (startWeekday === 0) ? 6 : startWeekday - 1;
+    for (var i = 0; i < dayOffset; i++) week.push('  ');
+
+    for (var d = 1; d <= daysInMonth; d++) {
+      var dayStr = (d < 10 ? ' ' : '') + d;
+      if (d === today) dayStr = '<mark>' + dayStr + '</mark>';
+      week.push(dayStr);
+      if (week.length === 7) { weeks.push(week); week = []; }
+    }
+
+    if (week.length > 0) {
+      while (week.length < 7) week.push('  ');
+      weeks.push(week);
+    }
+
+    var calendarHTML = weekHeader.join(' ') + '<br>';
+    weeks.forEach(function(w) {
+      calendarHTML += w.join(' ') + '<br>';
+    });
+    calendar.innerHTML = calendarHTML;
+  }
+
+  renderCalendar();
+  setInterval(renderCalendar, 60000);
+
+  // Notizen speichern
+  var notesTextarea = document.getElementById('notes');
+  var saveNotesBtn = document.getElementById('saveNotesBtn');
+
+  window.onload = function() {
+    if (localStorage.getItem('myNotes')) {
+      notesTextarea.value = localStorage.getItem('myNotes');
+    }
+  };
+
+  saveNotesBtn.addEventListener('click', function() {
+    localStorage.setItem('myNotes', notesTextarea.value);
+    alert("Notizen gespeichert!");
+  });
+
+  // Rechner
+  var calcDisplay = document.getElementById('calcDisplay');
+
+  window.calcPress = function(val) {
+    calcDisplay.value += val;
+  };
+
+  window.calcClear = function() {
+    calcDisplay.value = '';
+  };
+
+  window.calcCalculate = function() {
+    try {
+      var result = eval(calcDisplay.value);
+      calcDisplay.value = result;
+    } catch (e) {
+      calcDisplay.value = 'Fehler';
+    }
+  };
+})();
 </script>
 
 </body>
